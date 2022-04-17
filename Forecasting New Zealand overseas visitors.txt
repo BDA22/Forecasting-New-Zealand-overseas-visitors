@@ -1,0 +1,403 @@
+R version 4.1.3 (2022-03-10) -- "One Push-Up"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+Session restored from your saved work on 2022-Apr-01 14:06:15 UTC (20 hours ago)
+> osvisit <- read.csv ( "osvisit.dat" , header= FALSE)
+> 
+> osv <- ts (osvisit$V1, start = 1977 , frequency = 12 )
+> class (osv)
+[1] "ts"
+> window (osv, start= c ( 1977 , 1 ), end= c ( 1980 , 12 ))
+       Jan   Feb   Mar   Apr   May   Jun   Jul   Aug   Sep   Oct
+1977 48176 35792 36376 29784 21296 17032 22804 27476 21168 29928
+1978 44672 40500 36608 28524 23060 15760 20892 28992 23048 35052
+1979 49968 42068 41512 29272 25868 18216 23166 29808 25232 33780
+1980 48224 51353 46784 31284 26681 22817 26944 32902 25567 37113
+       Nov   Dec
+1977 37516 62156
+1978 40564 69304
+1979 43916 69576
+1980 44788 70706
+> plot.ts (osv, main="New Zealand Overseas
++ Visitors",ylab="Frequency")
+> mt <- 1 : 12
+> names (mt) <- month.name
+> windows ( height= 20 , width= 30 )
+Error in windows(height = 20, width = 30) : 
+  could not find function "windows"
+> plot (mt,osv[ 1 : 12 ], "l" , col= 1 , ylim= range (osv), ylab= "Overseas Visitors" , xlim= c ( 0 , 13 ))
+> for(i in 2 : 19 ) points (mt,osv[mt+(i -1 )* 12 ], "l" , col= i)
+> legend ( x= 4, y= 190000 , legend= c ( 1977 : 1982 ), lty= 1 : 6, col= 1 : 6 )
+> legend ( x= 6, y= 190000 , legend= c ( 1983 : 1988 ), lty= 7 :12,col= 7 : 12 )
+> legend ( x= 8, y= 190000 , legend= c ( 1989 : 1995 ), lty= 13: 19,col= 13 : 19 )
+> points (mt,osv[mt+(i -1 )* 12 ], pch= month.abb)
+> osv_stl <- stl (osv, s.window= 12 )
+> plot.ts (osv_stl$time.series)
+> plot.ts (osv_stl$time.series, main="STL Decomposition")
+> osv_time <- 1 : length (osv)
+> osv_mths <- as.factor ( rep (month.abb, times= 19 ))
+> osv_trend <- lm (osv~osv_time)
+> summary (osv_trend)
+
+Call:
+lm(formula = osv ~ osv_time)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-33968 -13919  -3066  10497  79326 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 20028.62    2585.63   7.746 3.17e-13 ***
+osv_time      385.36      19.58  19.683  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 19460 on 226 degrees of freedom
+Multiple R-squared:  0.6316,	Adjusted R-squared:  0.6299 
+F-statistic: 387.4 on 1 and 226 DF,  p-value: < 2.2e-16
+
+> osv_season <- lm(osv~osv_mths)
+> summary(osv_season)
+
+Call:
+lm(formula = osv ~ osv_mths)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-45099 -23919  -2738  17161  79961 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept)    57116       6277   9.100  < 2e-16 ***
+osv_mthsAug    -4226       8877  -0.476   0.6345    
+osv_mthsDec    50139       8877   5.648 5.07e-08 ***
+osv_mthsFeb    20143       8877   2.269   0.0242 *  
+osv_mthsJan    17166       8877   1.934   0.0544 .  
+osv_mthsJul    -5670       8877  -0.639   0.5236    
+osv_mthsJun   -15351       8877  -1.729   0.0852 .  
+osv_mthsMar    13799       8877   1.555   0.1215    
+osv_mthsMay   -12883       8877  -1.451   0.1481    
+osv_mthsNov    19286       8877   2.173   0.0309 *  
+osv_mthsOct     7190       8877   0.810   0.4188    
+osv_mthsSep    -5162       8877  -0.582   0.5615    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 27360 on 216 degrees of freedom
+Multiple R-squared:  0.3038,	Adjusted R-squared:  0.2683 
+F-statistic: 8.567 on 11 and 216 DF,  p-value: 1.63e-12
+
+> osv_trend_season <- lm(osv~osv_time+osv_mths)
+> summary(osv_trend_season)
+
+Call:
+lm(formula = osv ~ osv_time + osv_mths)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-17472  -5482  -1120   3805  38559 
+
+Coefficients:
+              Estimate Std. Error t value Pr(>|t|)    
+(Intercept)  14181.157   2269.500   6.249 2.19e-09 ***
+osv_time       383.346      8.944  42.860  < 2e-16 ***
+osv_mthsAug  -5759.017   2880.198  -2.000   0.0468 *  
+osv_mthsDec  47072.650   2880.864  16.340  < 2e-16 ***
+osv_mthsFeb  20909.535   2880.031   7.260 6.97e-12 ***
+osv_mthsJan  18316.407   2880.100   6.360 1.20e-09 ***
+osv_mthsJul  -6820.460   2880.100  -2.368   0.0188 *  
+osv_mthsJun -16117.798   2880.031  -5.596 6.63e-08 ***
+osv_mthsMar  14182.504   2879.989   4.924 1.68e-06 ***
+osv_mthsMay -13266.767   2879.989  -4.607 7.01e-06 ***
+osv_mthsNov  16602.523   2880.656   5.763 2.83e-08 ***
+osv_mthsOct   4890.027   2880.475   1.698   0.0910 .  
+osv_mthsSep  -7078.837   2880.323  -2.458   0.0148 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 8877 on 215 degrees of freedom
+Multiple R-squared:  0.927,	Adjusted R-squared:  0.923 
+F-statistic: 227.7 on 12 and 215 DF,  p-value: < 2.2e-16
+
+> par ( mfrow= c ( 3 , 1 ))
+> hist ( residuals (osv_trend), main = "Trend Error" )
+Error in plot.new() : figure margins too large
+> hist ( residuals (osv_season), main= "Season Error" )
+Error in plot.new() : figure margins too large
+> hist ( residuals (osv_trend_season), main= "Trend+Season
++ Error" )
+Error in plot.new() : figure margins too large
+> par ( mfrow= c ( 3 , 1 ))
+> hist ( residuals (osv_trend), main = "Trend Error" )
+> hist ( residuals (osv_season), main= "Season Error" )
+> hist ( residuals (osv_trend_season), main= "Trend+Season
++ Error" )
+> set.seed ( 123 )
+> t1 <- arima.sim ( list ( order = c ( 1 , 0 , 0 ), ar = 0.6 ), n = 100)
+> t2 <- arima.sim ( list ( order = c ( 0 , 0 , 1 ), ma = - 0.2), n = 100 )
+> t3 <- arima.sim ( list ( order = c ( 1 , 0 , 1 ), ar = 0.6,ma= - 0.2 ), n = 100 )
+> tail (t1); tail (t2); tail (t3) 
+[1] -2.4346274 -1.8410030 -0.1856052 -0.6867101  0.1959383 -1.5003197
+[1]  1.7698309 -0.3842096  0.1300509  0.2198384  1.1837384 -0.7625590
+[1] -0.5823629  0.5791574 -0.3075820  0.6037788  0.1646962  0.7439428
+> par ( mfrow= c ( 3 , 2 ))
+> acf (t1); pacf (t1)
+> acf (t2); pacf (t2)
+> acf (t3); pacf (t3)
+> arima.sim ( list ( order = c ( 1 , 0 , 0 ), ar = 1.6 ), n = 100)
+Error in arima.sim(list(order = c(1, 0, 0), ar = 1.6), n = 100) : 
+  'ar' part of model is not stationary
+> arima.sim ( list ( order = c ( 1 , 0 , 0 )), ar = 1.6, n = 100)
+Error in arima.sim(list(order = c(1, 0, 0)), ar = 1.6, n = 100) : 
+  inconsistent specification of 'ar' order
+> 
+> windows ( height= 10 , width= 20 )
+Error in windows(height = 10, width = 20) : 
+  could not find function "windows"
+> par ( mfrow= c ( 1 , 2 ))
+> acf (osv)
+> pacf (osv)
+> osv_ar <- ar (osv)
+> osv_ar
+
+Call:
+ar(x = osv)
+
+Coefficients:
+      1        2        3        4        5        6        7  
+ 0.6976   0.1015  -0.0238   0.0315   0.0106  -0.1569   0.0183  
+      8        9       10       11       12       13  
+ 0.1238   0.0223   0.0279  -0.0039   0.6398  -0.5227  
+
+Order selected 13  sigma^2 estimated as  123787045
+> ## Call:
+> ## ar(x = osv)
+> ##
+> ## Coefficients:
+> ## 1 2 3 4 5 6 7 8
+> ## 0.6976 0.1015 -0.0238 0.0315 0.0106 -0.1569 0.0183 0.1238
+> ## 9 10 11 12 13
+> ## 0.0223 0.0279 -0.0039 0.6398 -0.5227
+> t
+function (x) 
+UseMethod("t")
+<bytecode: 0x564deeb06640>
+<environment: namespace:base>
+> t t t-1 t
+Error: unexpected symbol in "t t"
+> t-1
+Error in t - 1 : non-numeric argument to binary operator
+> ##
+> ## Order selected 13 sigma^2 estimated as 123787045
+> osv_ar <- ar (osv)
+> osv_ar
+
+Call:
+ar(x = osv)
+
+Coefficients:
+      1        2        3        4        5        6        7  
+ 0.6976   0.1015  -0.0238   0.0315   0.0106  -0.1569   0.0183  
+      8        9       10       11       12       13  
+ 0.1238   0.0223   0.0279  -0.0039   0.6398  -0.5227  
+
+Order selected 13  sigma^2 estimated as  123787045
+> windows ( height= 10 , width= 20 )
+Error in windows(height = 10, width = 20) : 
+  could not find function "windows"
+> par ( mfrow= c ( 1 , 2 ))
+> hist ( na.omit (osv_ar$resid), main= "Histogram of AR
++ Residuals" )
+> acf ( na.omit (osv_ar$resid), main= "ACF of AR Residuals" )
+> auto_ma_order <- function(x,q){
++     aicc <- NULL
++     for(i in 1 :q) {
++         tmodel <- arima (x, order= c ( 0 , 0 ,i))
++         aicc[i] <- as.numeric (tmodel$aic)
++     }
++     return ( which.min (aicc))
++ }
+> auto_ma_order (osv, 15 )
+[1] 14
+> sapply ( 1 : 20 ,auto_ma_order, x= osv)
+ [1]  1  2  3  4  5  6  6  8  9  9  9  9 13 14 14 16 17 18 18 20
+> osv_arima_1 <- arima (osv, order= c ( 1 , 0 , 1 ))
+> osv_arima_2 <- arima (osv, order= c ( 2 , 0 , 1 ))
+> osv_arima_3 <- arima (osv, order= c ( 1 , 0 , 2 ))
+> osv_arima_4 <- arima (osv, order= c ( 1 , 1 , 1 ))
+> osv_arima_5 <- arima (osv, order= c ( 2 , 1 , 1 ))
+> osv_arima_6 <- arima (osv, order= c ( 1 , 1 , 2 ))
+> osv_arima_1; osv_arima_2; osv_arima_3
+
+Call:
+arima(x = osv, order = c(1, 0, 1))
+
+Coefficients:
+         ar1     ma1  intercept
+      0.9030  0.0008   68427.30
+s.e.  0.0348  0.0659   10168.16
+
+sigma^2 estimated as 233640077:  log likelihood = -2521.06,  aic = 5050.13
+
+Call:
+arima(x = osv, order = c(2, 0, 1))
+
+Coefficients:
+          ar1    ar2     ma1  intercept
+      -0.0845  0.915  0.9935   68644.31
+s.e.   0.0310  0.031  0.0083   11055.67
+
+sigma^2 estimated as 216119578:  log likelihood = -2513.13,  aic = 5036.26
+
+Call:
+arima(x = osv, order = c(1, 0, 2))
+
+Coefficients:
+         ar1     ma1     ma2  intercept
+      0.8755  0.0253  0.1315  67650.666
+s.e.  0.0428  0.0792  0.0607   9104.802
+
+sigma^2 estimated as 229397770:  log likelihood = -2518.99,  aic = 5047.98
+> mean ( residuals (osv_arima_1)) # Mean Error
+[1] 106.6978
+> ## [1] 106.6978
+> sqrt ( mean ( residuals (osv_arima_1)^ 2 )) # Root Mean Square
+[1] 15285.29
+> Error
+Error: object 'Error' not found
+> ## [1] 15285.29
+> mean ( abs ( residuals (osv_arima_1))) # Mean Absolute Error
+[1] 11672.7
+> ## [1] 11672.7
+> mean ( residuals (osv_arima_1)/osv)* 100 # Mean Percentage
+[1] -5.35765
+> Error
+Error: object 'Error' not found
+> ## [1] -5.35765
+> mean ( abs ( residuals (osv_arima_1)/osv))* 100 # Mean Absolute
+[1] 19.04502
+> Percentage Error
+Error: unexpected symbol in "Percentage Error"
+> ## [1] 19.04502
+> accuracy (osv_arima_1)
+                   ME     RMSE     MAE      MPE     MAPE      MASE
+Training set 106.6978 15285.29 11672.7 -5.35765 19.04502 0.9717733
+                    ACF1
+Training set 0.004153521
+> ## ME RMSE MAE MPE MAPE MASE
+> ## Training set 106.6978 15285.29 11672.7 -5.35765 19.04502
+> 0.9717733
+[1] 0.9717733
+> ## ACF1
+> ## Training set 0.004153521
+> mean ( abs ( residuals (osv_arima_2)/osv))* 100
+[1] 19.00937
+> ## [1] 19.01274
+> mean ( abs ( residuals (osv_arima_3)/osv))* 100
+[1] 18.75919
+> ## [1] 18.75919
+> mean ( abs ( residuals (osv_arima_4)/osv))* 100
+[1] 19.01341
+> ## [1] 19.01341
+> seasonal= c ( 0 , 1 , 0 ))
+Error: unexpected ')' in "seasonal= c ( 0 , 1 , 0 ))"
+> osv_seasonal_arima3 <- arima (osv, order= c ( 1 , 1 , 0 ),
++                               seasonal= c ( 1 , 1 , 0 ))
+> osv_seasonal_arima4 <- arima (osv, order= c ( 0 , 1 , 1 ),
++                               seasonal= c ( 0 , 1 , 1 ))
+> osv_seasonal_arima5 <- arima (osv, order= c ( 1 , 1 , 0 ),
++                               seasonal= c ( 0 , 1 , 1 ))
+> osv_seasonal_arima6 <- arima (osv, order= c ( 0 , 1 , 1 ),
++                               seasonal= c ( 1 , 1 , 0 ))
+> osv_seasonal_arima7 <- arima (osv, order= c ( 1 , 1 , 1 ),
++                               seasonal= c ( 1 , 1 , 1 ))
+> osv_seasonal_arima8 <- arima (osv, order= c ( 1 , 1 , 1 ),
++                               seasonal= c ( 1 , 1 , 0 ))
+> osv_seasonal_arima9 <- arima (osv, order= c ( 1 , 1 , 1 ),
++                               seasonal= c ( 0 , 1 , 1 ))
+> osv_seasonal_arima2 <- arima (osv, order= c ( 1 , 1 , 0 ),
++                               seasonal= c ( 0 , 1 , 0 ))
+> osv_seasonal_arima3 <- arima (osv, order= c ( 1 , 1 , 0 ),
++                               seasonal= c ( 1 , 1 , 0 ))
+> osv_seasonal_arima4 <- arima (osv, order= c ( 0 , 1 , 1 ),
++                               seasonal= c ( 0 , 1 , 1 ))
+> osv_seasonal_arima5 <- arima (osv, order= c ( 1 , 1 , 0 ),
++                               seasonal= c ( 0 , 1 , 1 ))
+> osv_seasonal_arima6 <- arima (osv, order= c ( 0 , 1 , 1 ),
++                               seasonal= c ( 1 , 1 , 0 ))
+> osv_seasonal_arima7 <- arima (osv, order= c ( 1 , 1 , 1 ),
++                               seasonal= c ( 1 , 1 , 1 ))
+> osv_seasonal_arima8 <- arima (osv, order= c ( 1 , 1 , 1 ),
++                               seasonal= c ( 1 , 1 , 0 ))
+> osv_seasonal_arima9 <- arima (osv, order= c ( 1 , 1 , 1 ),
++                               seasonal= c ( 0 , 1 , 1 ))
+> accuracy (osv_seasonal_arima2)[ 5 ]
+[1] 5.525674
+> # [1] 5.525674
+> accuracy (osv_seasonal_arima3)[ 5 ]
+[1] 5.206777
+> ## [1] 5.206777
+> accuracy (osv_seasonal_arima4)[ 5 ]
+[1] 4.903352
+> ## [1] 4.903352
+> accuracy (osv_seasonal_arima5)[ 5 ]
+[1] 5.113835
+> ## [1] 5.113835
+> accuracy (osv_seasonal_arima6)[ 5 ]
+[1] 4.946375
+> ## [1] 4.946375
+> accuracy (osv_seasonal_arima7)[ 5 ]
+[1] 4.603231
+> ## [1] 4.603231
+> accuracy (osv_seasonal_arima8)[ 5 ]
+[1] 4.631682
+> ## [1] 4.631682
+> accuracy (osv_seasonal_arima9)[ 5 ]
+[1] 4.5997
+> ## [1] 4.5997
+> opt_model <- auto.arima (osv, max.p= 6 , max.q= 6 , max.d= 4 ,
++                          max.P= 3 , max.Q= 3 , max.D= 3 )
+> opt_model
+Series: osv 
+ARIMA(6,1,2)(0,1,1)[12] 
+
+Coefficients:
+         ar1      ar2     ar3      ar4     ar5      ar6      ma1
+      0.8700  -0.3949  0.0678  -0.2720  0.0476  -0.2504  -1.3914
+s.e.  0.2193   0.1152  0.0956   0.0965  0.0938   0.1048   0.2233
+         ma2     sma1
+      0.6462  -0.4902
+s.e.  0.1740   0.0662
+
+sigma^2 = 17006897:  log likelihood = -2092.3
+AIC=4204.59   AICc=4205.67   BIC=4238.3
+> accuracy (opt_model)
+                   ME     RMSE      MAE       MPE     MAPE      MASE
+Training set 297.0293 3919.934 2748.761 0.1716686 4.418683 0.5105921
+                    ACF1
+Training set 0.002083938
+> accuracy (opt_model)
+                   ME     RMSE      MAE       MPE     MAPE      MASE
+Training set 297.0293 3919.934 2748.761 0.1716686 4.418683 0.5105921
+                    ACF1
+Training set 0.002083938
+> ## ME RMSE MAE MPE MAPE MASE
+> ## Training set 236.9483 3929.388 2820.913 0.07114353 4.592125
+> 0.5239947
+[1] 0.5239947
+> ## ACF1
+> ## Training set -0.02654602
