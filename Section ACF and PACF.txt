@@ -1,0 +1,7 @@
+> set.seed ( 12345 )
+> y <- rnorm ( 500 )
+> rwy <- cumsum (y)
+> par ( mfrow= c ( 3 , 1 ))
+> plot.ts (rwy, main= "Random Walk" )
+> acf (rwy, lag.max= 100 , main= "ACF of Random Walk" )
+> pacf (rwy, main= "PACF of Random Walk" )
